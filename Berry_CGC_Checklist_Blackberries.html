@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Berry's CGC Checklist</title>
+<style>
+  :root {
+    --pink-deep: #c2185b;
+    --pink-mid: #e91e8c;
+    --pink-light: #f8bbd0;
+    --pink-card: #fff0f6;
+    --pink-border: #f48fb1;
+    --berry-mid: #9c27b0;
+    --green: #2e7d32;
+    --green-light: #c8e6c9;
+    --cream: #fff9fc;
+    --text: #3a0a2a;
+    --muted: #ad6e8a;
+    --shadow: 0 2px 16px rgba(194,24,91,0.13);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Georgia', serif;
+    background: var(--cream);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0 0 60px 0;
+    background-image: repeating-linear-gradient(135deg, transparent, transparent 60px, rgba(244,143,177,0.04) 60px, rgba(244,143,177,0.04) 61px);
+  }
+  @keyframes shimmer { 0%{ background-position:-200% center; } 100%{ background-position:200% center; } }
+  @keyframes twinkle { 0%,100%{ opacity:.2; transform:scale(.7); } 50%{ opacity:1; transform:scale(1.2); } }
+  @keyframes float { 0%,100%{ transform:translateY(0) rotate(-5deg); } 50%{ transform:translateY(-9px) rotate(5deg); } }
+  @keyframes fall { to{ transform:translateY(110vh) rotate(720deg); opacity:0; } }
+  @keyframes spin { to{ transform:rotate(360deg); } }
+
+  /* ── HEADER ── */
+  header {
+    background: linear-gradient(135deg,#c2185b 0%,#e91e8c 35%,#f06292 65%,#f48fb1 100%);
+    color:#fff; padding:36px 24px 28px; text-align:center;
+    position:relative; overflow:hidden;
+    box-shadow:0 4px 24px rgba(194,24,91,.35);
+  }
+  .sparkle {
+    position:absolute; pointer-events:none; font-size:1.1rem;
+    animation:twinkle var(--d,2s) ease-in-out infinite;
+    animation-delay:var(--delay,0s); opacity:.7;
+  }
+  .header-berry {
+    position:absolute; animation:float var(--fd,3s) ease-in-out infinite;
+    animation-delay:var(--delay,0s); opacity:.9; pointer-events:none;
+    width:var(--sz,28px); height:auto;
+  }
+  header .paw { font-size:2rem; display:block; margin-bottom:4px; position:relative; z-index:1; }
+  header h1 {
+    font-size:2.1rem; font-weight:bold; letter-spacing:.5px;
+    position:relative; z-index:1;
+    background:linear-gradient(90deg,#fff 0%,#ffe0ef 30%,#fff 50%,#ffd6ea 70%,#fff 100%);
+    background-size:200% auto; -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent; background-clip:text;
+    animation:shimmer 3s linear infinite;
+  }
+  header .subtitle { font-size:.95rem; color:#fce4ec; margin-top:4px; font-style:italic; position:relative; z-index:1; }
+  header .tag {
+    display:inline-flex; align-items:center; gap:6px;
+    background:rgba(255,255,255,.22); border:1px solid rgba(255,255,255,.35);
+    border-radius:20px; padding:4px 16px; font-size:.78rem; margin-top:10px;
+    letter-spacing:.5px; position:relative; z-index:1;
+  }
+  .header-divider { margin-top:14px; display:flex; align-items:center; justify-content:center; gap:8px; position:relative; z-index:1; opacity:.8; }
+
+  /* ── PROGRESS ── */
+  .progress-section { background:var(--pink-card); border-bottom:2px solid var(--pink-border); padding:20px 24px 16px; }
+  .progress-berry-row { display:flex; justify-content:center; gap:8px; margin-bottom:12px; }
+  .progress-berry-row .pb { width:22px; height:auto; transition:all .3s; opacity:.25; }
+  .progress-berry-row .pb.lit { opacity:1; transform:scale(1.2); }
+  .progress-row { display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+  .progress-label { font-size:.82rem; color:var(--muted); font-style:italic; flex:1; min-width:120px; }
+  .progress-count { font-size:1.5rem; font-weight:bold; color:var(--pink-deep); min-width:70px; text-align:right; }
+  .progress-bar-wrap { width:100%; height:14px; background:var(--pink-light); border-radius:8px; overflow:hidden; margin-top:10px; border:1px solid var(--pink-border); }
+  .progress-bar-fill {
+    height:100%; background:linear-gradient(90deg,#e91e8c 0%,#9c27b0 50%,#c2185b 100%);
+    background-size:200% auto; animation:shimmer 2s linear infinite;
+    border-radius:8px; transition:width .5s; width:0%;
+  }
+  .progress-badge { text-align:center; margin-top:10px; font-size:.88rem; color:var(--pink-deep); font-style:italic; min-height:20px; display:flex; align-items:center; justify-content:center; gap:6px; }
+
+  /* ── CONTROLS ── */
+  .controls { display:flex; gap:10px; padding:14px 24px 0; flex-wrap:wrap; }
+  .btn { padding:8px 18px; border-radius:20px; border:1.5px solid var(--pink-mid); background:transparent; color:var(--pink-mid); font-size:.82rem; cursor:pointer; font-family:Georgia,serif; transition:all .2s; display:inline-flex; align-items:center; gap:5px; }
+  .btn:hover { background:var(--pink-mid); color:#fff; }
+  .btn.reset { border-color:var(--muted); color:var(--muted); }
+  .btn.reset:hover { background:var(--muted); color:#fff; }
+
+  /* ── TABS ── */
+  .filter-tabs { display:flex; gap:8px; padding:16px 24px 4px; overflow-x:auto; }
+  .tab { padding:6px 16px; border-radius:20px; border:1.5px solid var(--pink-border); background:transparent; color:var(--muted); font-size:.8rem; cursor:pointer; font-family:Georgia,serif; white-space:nowrap; transition:all .2s; display:inline-flex; align-items:center; gap:5px; }
+  .tab.active { background:var(--pink-deep); border-color:var(--pink-deep); color:#fff; }
+
+  /* ── DIVIDER ── */
+  .berry-divider { display:flex; align-items:center; justify-content:center; gap:6px; padding:2px 0; opacity:.45; }
+
+  /* ── ITEMS ── */
+  .items-list { padding:14px 16px 0; display:flex; flex-direction:column; gap:12px; }
+  .item-card { background:var(--pink-card); border:1.5px solid var(--pink-border); border-radius:14px; overflow:hidden; box-shadow:var(--shadow); }
+  .item-card.mastered { border-color:var(--green); background:linear-gradient(to bottom,#f3fbf6,#fff0f6); }
+  .item-card.mastered .item-header { background:var(--green-light); }
+  .item-header { display:flex; align-items:flex-start; gap:14px; padding:16px 18px 14px; cursor:pointer; background:linear-gradient(90deg,#fce4ec 0%,#f8bbd0 100%); user-select:none; }
+  .check-wrap { flex-shrink:0; margin-top:2px; }
+  .check-circle { width:28px; height:28px; border-radius:50%; border:2px solid var(--pink-mid); background:#fff; display:flex; align-items:center; justify-content:center; font-size:1rem; transition:all .25s; cursor:pointer; }
+  .item-card.mastered .check-circle { background:var(--green); border-color:var(--green); color:#fff; }
+  .item-meta { flex:1; min-width:0; }
+  .item-number { font-size:.7rem; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:2px; display:flex; align-items:center; gap:4px; }
+  .item-title { font-size:1.02rem; font-weight:bold; color:var(--pink-deep); line-height:1.3; }
+  .item-card.mastered .item-title { color:var(--green); }
+  .mastered-date { font-size:.72rem; color:var(--green); margin-top:3px; font-style:italic; }
+  .expand-icon { flex-shrink:0; color:var(--muted); font-size:1rem; margin-top:4px; transition:transform .3s; }
+  .item-card.expanded .expand-icon { transform:rotate(180deg); }
+  .item-body { max-height:0; overflow:hidden; transition:max-height .4s cubic-bezier(.4,0,.2,1); }
+  .item-card.expanded .item-body { max-height:680px; }
+  .item-body-inner { padding:16px 18px 18px; border-top:1px solid var(--pink-border); }
+  .item-desc { font-size:.88rem; color:var(--text); line-height:1.65; margin-bottom:12px; }
+  .what-to-practice { background:linear-gradient(135deg,#fce4ec 0%,#e1bee7 100%); border-radius:10px; padding:12px 14px; margin-bottom:14px; border:1px solid var(--pink-border); }
+  .item-card.mastered .what-to-practice { background:var(--green-light); border-color:var(--green); }
+  .what-label { font-size:.72rem; font-weight:bold; text-transform:uppercase; letter-spacing:1px; color:var(--pink-deep); margin-bottom:6px; display:flex; align-items:center; gap:5px; }
+  .item-card.mastered .what-label { color:var(--green); }
+  .what-list { list-style:none; padding:0; }
+  .what-list li { font-size:.83rem; color:var(--text); padding:3px 0 3px 22px; position:relative; line-height:1.5; }
+  .what-list li .bb-bullet { position:absolute; left:0; top:4px; width:14px; height:auto; }
+  .item-card.mastered .what-list li .bb-bullet { display:none; }
+  .item-card.mastered .what-list li::before { content:'✓'; position:absolute; left:0; color:var(--green); font-size:.8rem; top:3px; }
+  .notes-section label { font-size:.72rem; font-weight:bold; text-transform:uppercase; letter-spacing:1px; color:var(--muted); display:block; margin-bottom:6px; }
+  .notes-input { width:100%; min-height:72px; border:1.5px solid var(--pink-border); border-radius:8px; padding:10px 12px; font-size:.85rem; font-family:Georgia,serif; color:var(--text); background:#fff; resize:vertical; outline:none; transition:border-color .2s; }
+  .notes-input:focus { border-color:var(--pink-mid); }
+  .mark-btn { margin-top:12px; width:100%; padding:10px; border-radius:10px; border:none; font-size:.88rem; font-family:Georgia,serif; font-weight:bold; cursor:pointer; background:linear-gradient(90deg,var(--pink-mid) 0%,var(--berry-mid) 100%); color:#fff; transition:opacity .2s; display:flex; align-items:center; justify-content:center; gap:7px; }
+  .mark-btn:hover { opacity:.88; }
+  .item-card.mastered .mark-btn { background:transparent; border:1.5px solid var(--green); color:var(--green); }
+  .item-card.mastered .mark-btn:hover { background:var(--green-light); }
+
+  /* ── FOOTER ── */
+  .footer-note { text-align:center; font-size:.75rem; color:var(--muted); padding:30px 24px 0; font-style:italic; }
+  .footer-berries { display:flex; justify-content:center; align-items:center; gap:10px; padding:14px 0 0; opacity:.65; }
+
+  /* ── CONFETTI ── */
+  .confetti-wrap { position:fixed; top:0;left:0;right:0;bottom:0; pointer-events:none; z-index:999; overflow:hidden; }
+  .conf-piece { position:absolute; top:-24px; animation:fall linear forwards; }
+
+  .item-card.hidden { display:none; }
+
+  @media(max-width:480px){
+    header h1{font-size:1.6rem;}
+    .items-list{padding:12px 10px 0;}
+    .item-header{padding:14px 14px 12px;}
+    .item-body-inner{padding:14px 14px 16px;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <!-- Sparkles -->
+  <span class="sparkle" style="top:12%;left:8%;--d:1.8s;--delay:0s;">✨</span>
+  <span class="sparkle" style="top:18%;left:88%;--d:2.2s;--delay:.4s;">⭐</span>
+  <span class="sparkle" style="top:60%;left:5%;--d:2.5s;--delay:.9s;">✨</span>
+  <span class="sparkle" style="top:70%;left:91%;--d:1.6s;--delay:.2s;">💫</span>
+  <span class="sparkle" style="top:35%;left:93%;--d:2.0s;--delay:.6s;">✨</span>
+  <span class="sparkle" style="top:80%;left:15%;--d:2.3s;--delay:1.1s;">⭐</span>
+  <span class="sparkle" style="top:10%;left:50%;--d:1.5s;--delay:.3s;">💫</span>
+  <span class="sparkle" style="top:85%;left:75%;--d:2.1s;--delay:.7s;">✨</span>
+  <!-- Floating blackberries -->
+  <img class="header-berry" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 26'%3E%3Ccircle cx='8' cy='6' r='3.3' fill='%231a0030'/%3E%3Ccircle cx='14' cy='6' r='3.3' fill='%232a0048'/%3E%3Ccircle cx='4.5' cy='11.5' r='3.3' fill='%232a0048'/%3E%3Ccircle cx='11' cy='10.5' r='3.5' fill='%231a0030'/%3E%3Ccircle cx='17.5' cy='11.5' r='3.3' fill='%23380058'/%3E%3Ccircle cx='6' cy='17' r='3.2' fill='%231a0030'/%3E%3Ccircle cx='12' cy='16.5' r='3.2' fill='%232a0048'/%3E%3Ccircle cx='17' cy='17' r='3' fill='%23380058'/%3E%3Ccircle cx='9' cy='22' r='2.8' fill='%231a0030'/%3E%3Ccircle cx='14.5' cy='22' r='2.8' fill='%232a0048'/%3E%3Ccircle cx='7' cy='5' r='1.1' fill='rgba(255,255,255,.28)'/%3E%3Ccircle cx='3.8' cy='10.8' r='1' fill='rgba(255,255,255,.22)'/%3E%3Ccircle cx='10' cy='9.5' r='1.1' fill='rgba(255,255,255,.28)'/%3E%3Cpath d='M11 3.5Q9 1.5 7 2Q9.5 3 11 3.5Z' fill='%232e7d32'/%3E%3Cpath d='M11 3.5Q13 1.5 15 2Q12.5 3 11 3.5Z' fill='%23388e3c'/%3E%3Cline x1='11' y1='1.5' x2='11' y2='4' stroke='%232e7d32' stroke-width='1.2'/%3E%3C/svg%3E" style="top:10%;left:16%;--sz:32px;--fd:3.2s;--delay:0s;" alt="blackberry">
+  <img class="header-berry" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 26'%3E%3Ccircle cx='8' cy='6' r='3.3' fill='%231a0030'/%3E%3Ccircle cx='14' cy='6' r='3.3' fill='%232a0048'/%3E%3Ccircle cx='4.5' cy='11.5' r='3.3' fill='%232a0048'/%3E%3Ccircle cx='11' cy='10.5' r='3.5' fill='%231a0030'/%3E%3Ccircle cx='17.5' cy='11.5' r='3.3' fill='%23380058'/%3E%3Ccircle cx='6' cy='17' r='3.2' fill='%231a0030'/%3E%3Ccircle cx='12' cy='16.5' r='3.2' fill='%232a0048'/%3E%3Ccircle cx='17' cy='17' r='3' fill='%23380058'/%3E%3Ccircle cx='9' cy='22' r='2.8' fill='%231a0030'/%3E%3Ccircle cx='14.5' cy='22' r='2.8' fill='%232a0048'/%3E%3Ccircle cx='7' cy='5' r='1.1' fill='rgba(255,255,255,.28)'/%3E%3Ccircle cx='3.8' cy='10.8' r='1' fill='rgba(255,255,255,.22)'/%3E%3Ccircle cx='10' cy='9.5' r='1.1' fill='rgba(255,255,255,.28)'/%3E%3Cpath d='M11 3.5Q9 1.5 7 2Q9.5 3 11 3.5Z' fill='%232e7d32'/%3E%3Cpath d='M11 3.5Q13 1.5 15 2Q12.5 3 11 3.5Z' fill='%23388e3c'/%3E%3Cline x1='11' y1='1.5' x2='11' y2='4' stroke='%232e7d32' stroke-width='1.2'/%3E%3C/svg%3E" style="top:52%;left:78%;--sz:36px;--fd:2.8s;--delay:.5s;" alt="blackberry">
+  <img class="header-berry" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 26'%3E%3Ccircle cx='8' cy='6' r='3.3' fill='%231a0030'/%3E%3Ccircle cx='14' cy='6' r='3.3' fill='%232a0048'/%3E%3Ccircle cx='4.5' cy='11.5' r='3.3' fill='%232a0048'/%3E%3Ccircle cx='11' cy='10.5' r='3.5' fill='%231a0030'/%3E%3Ccircle cx='17.5' cy='11.5' r='3.3' fill='%23380058'/%3E%3Ccircle cx='6' cy='17' r='3.2' fill='%231a0030'/%3E%3Ccircle cx='12' cy='16.5' r='3.2' fill='%232a0048'/%3E%3Ccircle cx='17' cy='17' r='3' fill='%23380058'/%3E%3Ccircle cx='9' cy='22' r='2.8' fill='%231a0030'/%3E%3Ccircle cx='14.5' cy='22' r='2.8' fill='%232a0048'/%3E%3Ccircle cx='7' cy='5' r='1.1' fill='rgba(255,255,255,.28)'/%3E%3Ccircle cx='3.8' cy='10.8' r='1' fill='rgba(255,255,255,.22)'/%3E%3Ccircle cx='10' cy='9.5' r='1.1' fill='rgba(255,255,255,.28)'/%3E%3Cpath d='M11 3.5Q9 1.5 7 2Q9.5 3 11 3.5Z' fill='%232e7d32'/%3E%3Cpath d='M11 3.5Q13 1.5 15 2Q12.5 3 11 3.5Z' fill='%23388e3c'/%3E%3Cline x1='11' y1='1.5' x2='11' y2='4' stroke='%232e7d32' stroke-width='1.2'/%3E%3C/svg%3E" style="top:70%;left:30%;--sz:26px;--fd:3.5s;--delay:1s;" alt="blackberry">
+  <img class="header-berry" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 26'%3E%3Ccircle cx='8' cy='6' r='3.3' fill='%231a0030'/%3E%3Ccircle cx='14' cy='6' r='3.3' fill='%232a0048'/%3E%3Ccircle cx='4.5' cy='11.5' r='3.3' fill='%232a0048'/%3E%3Ccircle cx='11' cy='10.5' r='3.5' fill='%231a0030'/%3E%3Ccircle cx='17.5' cy='11.5' r='3.3' fill='%23380058'/%3E%3Ccircle cx='6' cy='17' r='3.2' fill='%231a0030'/%3E%3Ccircle cx='12' cy='16.5' r='3.2' fill='%232a0048'/%3E%3Ccircle cx='17' cy='17' r='3' fill='%23380058'/%3E%3Ccircle cx='9' cy='22' r='2.8' fill='%231a0030'/%3E%3Ccircle cx='14.5' cy='22' r='2.8' fill='%232a0048'/%3E%3Ccircle cx='7' cy='5' r='1.1' fill='rgba(255,255,255,.28)'/%3E%3Ccircle cx='3.8' cy='10.8' r='1' fill='rgba(255,255,255,.22)'/%3E%3Ccircle cx='10' cy='9.5' r='1.1' fill='rgba(255,255,255,.28)'/%3E%3Cpath d='M11 3.5Q9 1.5 7 2Q9.5 3 11 3.5Z' fill='%232e7d32'/%3E%3Cpath d='M11 3.5Q13 1.5 15 2Q12.5 3 11 3.5Z' fill='%23388e3c'/%3E%3Cline x1='11' y1='1.5' x2='11' y2='4' stroke='%232e7d32' stroke-width='1.2'/%3E%3C/svg%3E" style="top:20%;left:66%;--sz:30px;--fd:2.5s;--delay:.3s;" alt="blackberry">
+
+  <span class="paw">🐾</span>
+  <h1>Berry's CGC Journey ✨</h1>
+  <div class="subtitle">Canine Good Citizen Test Prep — Toy Poodle</div>
+  <div class="tag" id="headerTag">Started: September 2026</div>
+  <div class="header-divider" id="headerDiv"></div>
+</header>
+
+<div class="progress-section">
+  <div class="progress-berry-row" id="berryRow"></div>
+  <div class="progress-row">
+    <div class="progress-label">Skills mastered by Berry ✨</div>
+    <div class="progress-count" id="progressCount">0 / 10</div>
+  </div>
+  <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBar"></div></div>
+  <div class="progress-badge" id="progressBadge"></div>
+</div>
+
+<div class="controls">
+  <button class="btn" onclick="expandAll()" id="expandBtn">Expand All</button>
+  <button class="btn" onclick="collapseAll()">✨ Collapse All</button>
+  <button class="btn reset" onclick="confirmReset()">Reset All</button>
+</div>
+
+<div class="filter-tabs">
+  <button class="tab active" onclick="filterItems('all',this)" id="tabAll">All (10)</button>
+  <button class="tab" onclick="filterItems('pending',this)">✨ To Practice</button>
+  <button class="tab" onclick="filterItems('mastered',this)">💗 Mastered</button>
+</div>
+
+<div class="berry-divider" id="topDivider"></div>
+
+<div class="items-list" id="itemsList"></div>
+
+<div class="footer-berries" id="footerBerries"></div>
+<div class="footer-note">Progress is saved automatically in your browser. Tap any card to expand details and add notes. 💗</div>
+<div class="footer-berries" id="footerBerries2" style="padding-bottom:10px;opacity:.4;"></div>
+
+<div class="confetti-wrap" id="confettiWrap"></div>
+
+<script>
+// ── BLACKBERRY SVG ──────────────────────────────────────────────
+// A hand-drawn SVG blackberry with clustered drupelets, leaf & shine
+const BB_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 26" width="__W__" height="__H__" style="display:inline-block;vertical-align:middle;flex-shrink:0;">
+  <circle cx="8"    cy="6"    r="3.3" fill="#1a0030"/>
+  <circle cx="14"   cy="6"    r="3.3" fill="#2a0048"/>
+  <circle cx="4.5"  cy="11.5" r="3.3" fill="#2a0048"/>
+  <circle cx="11"   cy="10.5" r="3.5" fill="#1a0030"/>
+  <circle cx="17.5" cy="11.5" r="3.3" fill="#380058"/>
+  <circle cx="6"    cy="17"   r="3.2" fill="#1a0030"/>
+  <circle cx="12"   cy="16.5" r="3.2" fill="#2a0048"/>
+  <circle cx="17"   cy="17"   r="3.0" fill="#380058"/>
+  <circle cx="9"    cy="22"   r="2.8" fill="#1a0030"/>
+  <circle cx="14.5" cy="22"   r="2.8" fill="#2a0048"/>
+  <circle cx="7"    cy="5"    r="1.1" fill="rgba(255,255,255,.28)"/>
+  <circle cx="3.8"  cy="10.8" r="1.0" fill="rgba(255,255,255,.22)"/>
+  <circle cx="10"   cy="9.5"  r="1.1" fill="rgba(255,255,255,.28)"/>
+  <path d="M11 3.5Q9 1.5 7 2Q9.5 3 11 3.5Z"   fill="#2e7d32"/>
+  <path d="M11 3.5Q13 1.5 15 2Q12.5 3 11 3.5Z" fill="#388e3c"/>
+  <line x1="11" y1="1.5" x2="11" y2="4" stroke="#2e7d32" stroke-width="1.2"/>
+</svg>`;
+
+function bb(w, h) {
+  return BB_SVG.replace('__W__', w||18).replace('__H__', h||22);
+}
+
+// ── DATA ────────────────────────────────────────────────────────
+const CGC_ITEMS = [
+  { id:1,  title:"Accepting a Friendly Stranger",
+    desc:"A friendly stranger approaches and greets the handler in a natural, everyday manner. The dog must show no sign of resentment or shyness. The evaluator shakes hands and exchanges pleasantries, while the dog sits calmly without jumping up or breaking position to greet the stranger.",
+    tips:["Have friends greet you while Berry sits at your side","Ask strangers to approach calmly without reaching for Berry","Reward Berry for staying calm and ignoring the interaction","Practice at low-distraction locations first, then build up"] },
+  { id:2,  title:"Sitting Politely for Petting",
+    desc:"A friendly stranger approaches to pet the dog. The dog must sit politely and allow petting on the head and body. The dog may not jump on the evaluator or show signs of shyness or resentment during the interaction.",
+    tips:["Practice 'sit' with duration before adding the petting component","Have multiple people pet Berry while she holds a sit","Work on keeping all four paws on the floor as a default","Desensitize Berry to being touched on head, back, ears, and paws"] },
+  { id:3,  title:"Appearance and Grooming",
+    desc:"The evaluator inspects the dog for overall cleanliness and grooming, then softly combs or brushes the dog and lightly examines the ears and gently picks up each front foot. The dog must look clean and well-groomed, and accept being handled by a stranger.",
+    tips:["Brush Berry daily to build tolerance for grooming tools","Practice handling ears, paws, and mouth regularly","Have strangers (not just you) practice the grooming routine","Use high-value treats to build positive associations with grooming"] },
+  { id:4,  title:"Walking on a Loose Lead",
+    desc:"The dog must walk attentively with the handler — not necessarily in a perfect heel position — on a loose leash. The evaluator watches for pulling ahead, lagging behind, or crossing in front at turns. There is a right turn, left turn, and about turn, with at least one stop.",
+    tips:["Teach 'let's go' with a loose leash as the default","Stop and wait anytime Berry pulls — no forward movement for pulling","Reward frequently for staying near your side","Practice figure-8s, turns, and stops in low-distraction areas"] },
+  { id:5,  title:"Walking Through a Crowd",
+    desc:"The dog and handler walk around and close to several people (at least 3). The dog may show casual interest in strangers but must continue to walk without straining at the leash, jumping on people, or showing fear or aggression.",
+    tips:["Start with just one or two calm people, then build to groups","Practice at quiet parking lots, parks, or pet-friendly stores","Reward Berry for focusing on you rather than the people","Gradually increase crowd density and noise level over time"] },
+  { id:6,  title:"Sit and Down on Command / Staying in Place",
+    desc:"The dog must sit and lie down on command, then stay in position while the handler walks out to the end of a 20-foot line and returns. The dog must hold either a sit or a down — the handler chooses which — until released.",
+    tips:["Proof 'sit' and 'down' with hand signals and verbal cues separately","Build duration gradually: 5 sec → 30 sec → 1 min → 3 min","Increase distance slowly while maintaining the stay command","Practice with a 20-foot long line in low-distraction environments"] },
+  { id:7,  title:"Coming When Called",
+    desc:"The handler walks 10 feet from the dog, turns, and calls the dog. The dog must come willingly. The handler may use encouragement, but may not force the dog to come. The handler may prompt once.",
+    tips:["Use a strong recall cue and never punish Berry for returning","Practice restrained recall — have someone hold Berry while you call","Build distance gradually from 5 feet to 10 feet to 20+ feet","Make yourself the most exciting thing in the environment when you call"] },
+  { id:8,  title:"Reaction to Another Dog",
+    desc:"Two handlers and their dogs approach each other from about 20 feet, stop, shake hands, exchange pleasantries, then continue. The dogs may show casual interest but must not go to the other dog, strain on the leash, or show aggression.",
+    tips:["Socialize Berry with calm, well-mannered adult dogs","Practice 'watch me' when another dog is at a distance","Use parallel walking with a neutral dog to build calmness","Reward Berry for ignoring the other dog and staying focused on you"] },
+  { id:9,  title:"Reaction to Distractions",
+    desc:"The evaluator presents two distractions such as dropping a chair, rolling a crate dolly, having a jogger run in front, or dropping a crutch or cane. The dog may show curiosity or slight startle but must not panic, try to run away, show aggression, or bark excessively.",
+    tips:["Expose Berry to unusual sounds: dropped items, umbrellas opening, bikes","Practice 'look at that' to build confidence with novel stimuli","Reward calm recovery — startle is okay, panic is not","Gradually increase intensity of distractions as Berry gains confidence"] },
+  { id:10, title:"Supervised Separation",
+    desc:"The handler goes out of sight for 3 minutes while the dog is held by the evaluator. The dog must not continuously bark, whine, pace, or show more than mild agitation. The dog does not have to remain in a sit or down.",
+    tips:["Practice short separations — 30 seconds out of sight — then return calmly","Build duration slowly: 30 sec → 1 min → 2 min → 3 min","Desensitize Berry to being held or leashed by friendly strangers","Avoid big emotional hellos/goodbyes to reduce separation anxiety"] }
+];
+
+const BADGES = [
+  "",
+  "",
+  "",
+  "",
+  "Berry is finding her footing!",
+  "✨ Halfway there — great work, Berry! ✨",
+  "More than halfway — keep sparkling!",
+  "💗 Almost there — you go, Berry!",
+  "🌟 One more to go!",
+  "🌟 One more to go!",
+  "🎉 ✨ CGC Ready! Berry is a Canine Good Citizen! ✨ 🎉"
+];
+
+// ── STATE ────────────────────────────────────────────────────────
+let appData = {};
+try { appData = JSON.parse(localStorage.getItem('berry_cgc') || '{}'); } catch {}
+function save() { localStorage.setItem('berry_cgc', JSON.stringify(appData)); }
+
+// ── STATIC BERRY INJECTIONS ──────────────────────────────────────
+function injectStaticBerries() {
+  // Header tag
+  const tag = document.getElementById('headerTag');
+  tag.innerHTML = bb(16,19) + ' Started: September 2026 ' + bb(16,19);
+
+  // Header divider
+  document.getElementById('headerDiv').innerHTML =
+    [bb(18,22),'✨',bb(18,22),'✨',bb(18,22)].join('');
+
+  // Expand all button
+  document.getElementById('expandBtn').innerHTML = bb(14,17) + ' Expand All';
+
+  // Tab all
+  document.getElementById('tabAll').innerHTML = bb(14,17) + ' All (10)';
+
+  // Top divider
+  const td = document.getElementById('topDivider');
+  td.innerHTML = [bb(16,19),'✨',bb(16,19),'✨',bb(16,19),'✨',bb(16,19),'✨',bb(16,19)].join('');
+
+  // Footer berries
+  document.getElementById('footerBerries').innerHTML =
+    [bb(22,27),'✨',bb(22,27),'✨',bb(22,27)].join('');
+  document.getElementById('footerBerries2').innerHTML =
+    [bb(18,22),bb(18,22),bb(18,22)].join('');
+
+  // Progress berry row
+  const row = document.getElementById('berryRow');
+  row.innerHTML = '';
+  for (let i = 0; i < 10; i++) {
+    const span = document.createElement('span');
+    span.innerHTML = bb(22,27);
+    span.querySelector('svg').classList.add('pb');
+    span.querySelector('svg').id = 'pb' + i;
+    row.appendChild(span);
+  }
+}
+
+// ── RENDER ───────────────────────────────────────────────────────
+function render() {
+  const list = document.getElementById('itemsList');
+  list.innerHTML = '';
+  CGC_ITEMS.forEach(item => {
+    const d = appData[item.id] || {};
+    const m = !!d.mastered;
+
+    const card = document.createElement('div');
+    card.className = 'item-card' + (m ? ' mastered' : '');
+    card.id = 'card-' + item.id;
+
+    const tipsHTML = item.tips.map(t =>
+      `<li>${bb(14,17).replace('display:inline-block','display:inline-block').replace('class="','class="bb-bullet ')} ${t}</li>`
+    ).join('');
+    // Use a positioned image for bullets
+    const tipsHTMLFinal = item.tips.map(t =>
+      `<li><img class="bb-bullet" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 26'%3E%3Ccircle cx='8' cy='6' r='3.3' fill='%231a0030'/%3E%3Ccircle cx='14' cy='6' r='3.3' fill='%232a0048'/%3E%3Ccircle cx='4.5' cy='11.5' r='3.3' fill='%232a0048'/%3E%3Ccircle cx='11' cy='10.5' r='3.5' fill='%231a0030'/%3E%3Ccircle cx='17.5' cy='11.5' r='3.3' fill='%23380058'/%3E%3Ccircle cx='6' cy='17' r='3.2' fill='%231a0030'/%3E%3Ccircle cx='12' cy='16.5' r='3.2' fill='%232a0048'/%3E%3Ccircle cx='17' cy='17' r='3' fill='%23380058'/%3E%3Ccircle cx='9' cy='22' r='2.8' fill='%231a0030'/%3E%3Ccircle cx='14.5' cy='22' r='2.8' fill='%232a0048'/%3E%3Ccircle cx='7' cy='5' r='1.1' fill='rgba(255,255,255,.28)'/%3E%3Ccircle cx='10' cy='9.5' r='1.1' fill='rgba(255,255,255,.28)'/%3E%3Cpath d='M11 3.5Q9 1.5 7 2Q9.5 3 11 3.5Z' fill='%232e7d32'/%3E%3Cpath d='M11 3.5Q13 1.5 15 2Q12.5 3 11 3.5Z' fill='%23388e3c'/%3E%3Cline x1='11' y1='1.5' x2='11' y2='4' stroke='%232e7d32' stroke-width='1.2'/%3E%3C/svg%3E" alt=""> ${t}</li>`
+    ).join('');
+
+    card.innerHTML = `
+      <div class="item-header" onclick="toggleExpand(${item.id})">
+        <div class="check-wrap">
+          <div class="check-circle" onclick="toggleM(event,${item.id})">${m ? '✓' : ''}</div>
+        </div>
+        <div class="item-meta">
+          <div class="item-number" id="num${item.id}">Test Item ${item.id} of 10</div>
+          <div class="item-title">${item.title}</div>
+          ${m && d.date ? `<div class="mastered-date">✨ Mastered on ${d.date}</div>` : ''}
+        </div>
+        <div class="expand-icon">▼</div>
+      </div>
+      <div class="item-body">
+        <div class="item-body-inner">
+          <p class="item-desc">${item.desc}</p>
+          <div class="what-to-practice">
+            <div class="what-label" id="wl${item.id}">Practice Tips for Berry</div>
+            <ul class="what-list">${tipsHTMLFinal}</ul>
+          </div>
+          <div class="notes-section">
+            <label>✨ Notes &amp; Progress Log</label>
+            <textarea class="notes-input" id="notes${item.id}" placeholder="Add session notes, dates practiced, what clicked for Berry…" oninput="saveNote(${item.id})">${d.notes || ''}</textarea>
+          </div>
+          <button class="mark-btn" onclick="toggleM(event,${item.id})" id="mbtn${item.id}">
+            ${m ? '↩ Mark as Not Mastered Yet' : 'Mark as Mastered! ✨'}
+          </button>
+        </div>
+      </div>`;
+
+    list.appendChild(card);
+
+    // Insert berry number icon and what-label blackberry after render
+    const numEl = card.querySelector(`#num${item.id}`);
+    numEl.insertAdjacentHTML('afterbegin', bb(12,15) + ' ');
+
+    const wlEl = card.querySelector(`#wl${item.id}`);
+    wlEl.insertAdjacentHTML('afterbegin', bb(14,17) + ' ');
+
+    // Mark btn blackberry
+    if (!m) {
+      const mbtn = card.querySelector(`#mbtn${item.id}`);
+      mbtn.insertAdjacentHTML('afterbegin', bb(16,19) + ' ');
+    }
+
+    // Berry divider between cards
+    if (item.id < 10) {
+      const dv = document.createElement('div');
+      dv.className = 'berry-divider';
+      dv.style.fontSize = '0.7rem';
+      dv.style.opacity = '0.38';
+      dv.innerHTML = [bb(14,17),'·',bb(14,17),'·',bb(14,17)].join('');
+      list.appendChild(dv);
+    }
+  });
+
+  updateProgress();
+}
+
+function toggleExpand(id) {
+  document.getElementById('card-' + id).classList.toggle('expanded');
+}
+
+function toggleM(e, id) {
+  e.stopPropagation();
+  if (!appData[id]) appData[id] = {};
+  const was = appData[id].mastered;
+  appData[id].mastered = !was;
+  if (!was) {
+    appData[id].date = new Date().toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+    launchConfetti();
+  } else {
+    delete appData[id].date;
+  }
+  save(); render();
+  const c = document.getElementById('card-' + id);
+  if (c) c.classList.add('expanded');
+}
+
+function saveNote(id) {
+  if (!appData[id]) appData[id] = {};
+  appData[id].notes = document.getElementById('notes' + id).value;
+  save();
+}
+
+function updateProgress() {
+  const count = Object.values(appData).filter(d => d.mastered).length;
+  document.getElementById('progressCount').textContent = count + ' / 10';
+  document.getElementById('progressBar').style.width = (count * 10) + '%';
+
+  // Badge with blackberry SVGs
+  const badge = document.getElementById('progressBadge');
+  if (BADGES[count]) {
+    badge.innerHTML = (count > 0 ? bb(18,22) : '') + ' ' + BADGES[count] + ' ' + (count > 0 ? bb(18,22) : '');
+  } else {
+    badge.innerHTML = '';
+  }
+
+  // Light up progress berries
+  for (let i = 0; i < 10; i++) {
+    const el = document.getElementById('pb' + i);
+    if (el) {
+      el.style.opacity = i < count ? '1' : '0.25';
+      el.style.transform = i < count ? 'scale(1.2)' : 'scale(1)';
+    }
+  }
+}
+
+function expandAll() { document.querySelectorAll('.item-card:not(.hidden)').forEach(c => c.classList.add('expanded')); }
+function collapseAll() { document.querySelectorAll('.item-card').forEach(c => c.classList.remove('expanded')); }
+function confirmReset() {
+  if (confirm("Reset all of Berry's progress and notes? This cannot be undone.")) {
+    appData = {}; save(); render();
+  }
+}
+function filterItems(f, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.item-card').forEach(card => {
+    const m = card.classList.contains('mastered');
+    if (f === 'all') card.classList.remove('hidden');
+    else if (f === 'mastered') card.classList.toggle('hidden', !m);
+    else card.classList.toggle('hidden', m);
+  });
+}
+
+function launchConfetti() {
+  const wrap = document.getElementById('confettiWrap');
+  wrap.innerHTML = '';
+  const pinkCols = ['#e91e8c','#f48fb1','#9c27b0','#f8bbd0','#ce93d8','#fff','#ffd700','#c2185b'];
+  for (let i = 0; i < 65; i++) {
+    const p = document.createElement('div');
+    p.className = 'conf-piece';
+    if (i % 8 === 0) {
+      // real blackberry in confetti
+      p.innerHTML = bb(20, 24);
+      p.style.background = 'transparent';
+    } else if (i % 8 === 4) {
+      p.textContent = '✨';
+      p.style.fontSize = '1rem';
+      p.style.background = 'transparent';
+    } else {
+      p.style.width = (7 + Math.random() * 7) + 'px';
+      p.style.height = (7 + Math.random() * 7) + 'px';
+      p.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+      p.style.background = pinkCols[Math.floor(Math.random() * pinkCols.length)];
+    }
+    p.style.left = Math.random() * 100 + 'vw';
+    p.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+    p.style.animationDelay = Math.random() * 0.6 + 's';
+    wrap.appendChild(p);
+    setTimeout(() => p.remove(), 3800);
+  }
+}
+
+// ── INIT ─────────────────────────────────────────────────────────
+injectStaticBerries();
+render();
+</script>
+</body>
+</html>
